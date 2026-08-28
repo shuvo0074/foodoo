@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
@@ -12,6 +12,16 @@ const PLACEHOLDERS = [
   ['#2B2C3A', '#15151F'],
   ['#38301F', '#1C1712'],
 ];
+
+/**
+ * Wikimedia rejects requests carrying a generic User-Agent (Android's image
+ * loader sends "okhttp/x.y", which comes back 403 while iOS is let through).
+ * Their policy just asks for something descriptive, so send one on every
+ * request — harmless for the other hosts.
+ */
+const IMAGE_HEADERS = {
+  'User-Agent': 'Foodoo/1.0 (React Native demo app; contact: dev@foodoo.example)',
+};
 
 const hash = (s = '') => {
   let h = 0;
@@ -35,13 +45,15 @@ export default function Img({ uri, style, radius = 0, seed = '', children, dim =
 
   const photoStyle = useAnimatedStyle(() => ({ opacity: fade.value }));
 
+  const source = useMemo(() => (uri ? { uri, headers: IMAGE_HEADERS } : null), [uri]);
+
   return (
     <View style={[styles.wrap, { borderRadius: radius }, style]}>
       <LinearGradient colors={pal} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-      {!!uri && !failed && (
+      {!!source && !failed && (
         <Animated.View style={[StyleSheet.absoluteFill, photoStyle]}>
           <Image
-            source={{ uri }}
+            source={source}
             style={StyleSheet.absoluteFill}
             resizeMode="cover"
             onLoad={onLoad}

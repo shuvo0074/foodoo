@@ -17,6 +17,25 @@ npm start                         # Metro on its own
 
 Requirements: Xcode + CocoaPods for iOS, JDK 17 + Android SDK for Android.
 
+## Building a shareable Android APK
+
+```bash
+cd android
+./gradlew assembleRelease                                  # universal (all ABIs)
+./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a   # arm64 only, ~1/3 the size
+```
+
+Output lands in `android/app/build/outputs/apk/release/app-release.apk`. Ready-to-send copies are
+kept in `dist/` (untracked).
+
+Release signing reads `android/keystore.properties` (untracked — see `keystore.properties` for the
+demo key). Delete that file and the build silently falls back to the debug key, so a fresh clone
+still builds. **Generate your own keystore before publishing to Play** — the bundled one is a demo
+key and cannot be recovered or rotated once an app is published with it.
+
+Note: RN 0.87's template pins `compileSdkVersion = 37`, which is canary-only. `android/build.gradle`
+pins 36 (the newest stable) so the build works against a normal SDK install.
+
 ## What's in it
 
 | Screen | File | Highlights |
@@ -52,11 +71,15 @@ src/components/         Press, Img, Sheet, cards, cart bar, UI primitives
 | `react-native-reanimated` (+ `react-native-worklets`) | every animation; scroll-linked headers run on the UI thread |
 | `react-native-gesture-handler` | required by native-stack gestures |
 | `react-native-linear-gradient` | gradients on buttons, scrims, promo cards |
-| `@react-native-community/blur` | frosted tab bar and headers |
+| `@react-native-community/blur` | frosted tab bar and headers — **iOS only**, see `src/components/Frost.js` |
 | `react-native-vector-icons` (Ionicons) | all iconography |
 | `react-native-svg` | the animated delivery route |
 | `react-native-haptic-feedback` | press feedback |
 | `react-native-safe-area-context` / `react-native-screens` | insets + native screens |
+
+Blur note: `Frost` renders a real blur on iOS and a solid tint on Android. The Android side of
+`@react-native-community/blur` dims the whole window instead of its own bounds, which showed up as a
+grey wash over the page — don't reintroduce `BlurView` directly.
 
 Font note: only `Ionicons.ttf` is shipped — it's declared in `ios/Foodoo/Info.plist` (`UIAppFonts`)
 and copied on Android via `fonts.gradle` in `android/app/build.gradle`.

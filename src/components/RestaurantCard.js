@@ -4,13 +4,12 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSequence,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { colors, radius, sp, type, grad, hexA, elev, spring } from '../theme';
+import { colors, radius, sp, type, grad, hexA, elev } from '../theme';
 import { useStore, money } from '../state/store';
 import Press, { tap } from './Press';
 import Img from './Img';
@@ -22,7 +21,7 @@ export function HeartButton({ active, onToggle, size = 18, style }) {
   const a = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
 
   const press = useCallback(() => {
-    s.value = withSequence(withTiming(0.7, { duration: 90 }), withSpring(1, { damping: 6, stiffness: 300 }));
+    s.value = withSequence(withTiming(0.7, { duration: 90 }), withTiming(1, { duration: 160 }));
     tap(active ? 'light' : 'medium');
     onToggle?.();
   }, [active, onToggle]);

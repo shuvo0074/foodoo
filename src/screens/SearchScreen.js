@@ -182,7 +182,10 @@ export default function SearchScreen() {
                       <Ionicons name={c.icon} size={24} color={c.tint} />
                       <T v="h3" style={{ marginTop: sp(2) }}>{c.label}</T>
                       <T v="xs" c={colors.mute} style={{ marginTop: 3 }}>
-                        {RESTAURANTS.filter((r) => r.cats.includes(c.id)).length} PLACES
+                        {(() => {
+                          const n = RESTAURANTS.filter((r) => r.cats.includes(c.id)).length;
+                          return `${n} PLACE${n === 1 ? '' : 'S'}`;
+                        })()}
                       </T>
                     </View>
                   </Press>

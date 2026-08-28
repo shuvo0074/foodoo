@@ -3,7 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withSequence,
   withTiming,
   interpolate,
@@ -11,7 +10,7 @@ import Animated, {
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { colors, radius, sp, elev, spring, springSoft } from '../theme';
+import { colors, radius, sp, elev } from '../theme';
 import { useStore, money } from '../state/store';
 import Press from './Press';
 import Img from './Img';
@@ -30,14 +29,14 @@ export default function CartBar({ bottom = 0 }) {
   const nudge = useSharedValue(0);
 
   useEffect(() => {
-    show.value = withSpring(visible ? 1 : 0, springSoft);
+    show.value = withTiming(visible ? 1 : 0, { duration: 240 });
   }, [visible]);
 
   useEffect(() => {
     if (lastAdded === 0) return;
     nudge.value = withSequence(
-      withTiming(1, { duration: 130 }),
-      withSpring(0, { damping: 8, stiffness: 260 }),
+      withTiming(1, { duration: 120 }),
+      withTiming(0, { duration: 170 }),
     );
   }, [lastAdded]);
 
@@ -63,23 +62,29 @@ export default function CartBar({ bottom = 0 }) {
           end={{ x: 1, y: 1 }}
           style={[styles.bar, elev(3, colors.primary)]}
         >
-          <View style={styles.countPill}>
-            <T v="h3" c="#fff">{totals.count}</T>
-          </View>
+          {/* Padding lives on this inner row, never on the gradient: on iOS
+              react-native-linear-gradient paints inside its padding box, so
+              padding shrinks the visible gradient instead of insetting content
+              — which left the pill flush with the edge. */}
+          <View style={styles.barInner}>
+            <View style={styles.countPill}>
+              <T v="h3" c="#fff">{totals.count}</T>
+            </View>
 
-          <View style={{ flex: 1, marginLeft: sp(3) }}>
-            <T v="h3" c="#fff" numberOfLines={1}>
-              {totals.restaurant?.name ?? 'Your cart'}
-            </T>
-            <T v="sm" c="rgba(255,255,255,0.82)" numberOfLines={1}>
-              {totals.count} item{totals.count > 1 ? 's' : ''} · {money(totals.subtotal)}
-            </T>
-          </View>
+            <View style={{ flex: 1, marginLeft: sp(3) }}>
+              <T v="h3" c="#fff" numberOfLines={1}>
+                {totals.restaurant?.name ?? 'Your cart'}
+              </T>
+              <T v="sm" c="rgba(255,255,255,0.82)" numberOfLines={1}>
+                {totals.count} item{totals.count > 1 ? 's' : ''} · {money(totals.subtotal)}
+              </T>
+            </View>
 
-          <Row style={styles.viewCart}>
-            <T v="sm" c="#fff" style={{ fontWeight: '800' }}>View cart</T>
-            <Ionicons name="arrow-forward" size={15} color="#fff" style={{ marginLeft: 6 }} />
-          </Row>
+            <Row style={styles.viewCart}>
+              <T v="sm" c="#fff" style={{ fontWeight: '800' }}>View cart</T>
+              <Ionicons name="arrow-forward" size={15} color="#fff" style={{ marginLeft: 6 }} />
+            </Row>
+          </View>
         </LinearGradient>
       </Press>
     </Animated.View>
@@ -95,10 +100,12 @@ const styles = StyleSheet.create({
   bar: {
     height: 64,
     borderRadius: radius.lg,
+  },
+  barInner: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: sp(3),
-    paddingRight: sp(4),
+    paddingHorizontal: sp(3),
   },
   countPill: {
     width: 40,
@@ -109,9 +116,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.22)',
   },
   viewCart: {
-    marginLeft: sp(3),
-    backgroundColor: 'rgba(0,0,0,0.2)',
-    paddingHorizontal: sp(4),
+    // shrink-wrapped so a long restaurant name can never push it past the edge
+    flexShrink: 0,
+    marginLeft: sp(2.5),
+    backgroundColor: 'rgba(0,0,0,0.22)',
+    paddingHorizontal: sp(3.5),
     paddingVertical: sp(2.5),
     borderRadius: radius.pill,
   },

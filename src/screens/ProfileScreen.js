@@ -5,14 +5,14 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
-import { colors, radius, sp, hexA, grad, springSoft } from '../theme';
+import { colors, radius, sp, hexA, grad } from '../theme';
 import { USER, ADDRESSES, PAYMENTS, getRestaurant } from '../data';
 import { useStore } from '../state/store';
 import Press from '../components/Press';
@@ -37,7 +37,7 @@ export default function ProfileScreen() {
   const pct = USER.points / USER.nextTierAt;
   const bar = useSharedValue(0);
   useEffect(() => {
-    bar.value = withDelay(320, withSpring(pct, springSoft));
+    bar.value = withDelay(320, withTiming(pct, { duration: 700 }));
   }, [pct, bar]);
 
   const barStyle = useAnimatedStyle(() => ({ width: `${bar.value * 100}%` }));
@@ -71,7 +71,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* ---------------------------- loyalty --------------------------- */}
-        <Animated.View entering={FadeInDown.delay(80).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(80).duration(260)}>
           <View style={styles.tier}>
             <LinearGradient
               colors={[hexA(colors.gold, 0.16), 'rgba(255,255,255,0.02)']}
@@ -103,7 +103,7 @@ export default function ProfileScreen() {
         </Animated.View>
 
         {/* ----------------------------- stats ---------------------------- */}
-        <Animated.View entering={FadeInDown.delay(140).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(140).duration(260)}>
           <Row style={styles.stats}>
             {STATS(orders.length + 4, favs.length).map((s) => (
               <View key={s.label} style={styles.stat}>
@@ -183,7 +183,7 @@ export default function ProfileScreen() {
         ) : (
           <View style={{ paddingHorizontal: sp(5), gap: sp(3) }}>
             {favs.map((r, i) => (
-              <Animated.View key={r.id} entering={FadeInDown.delay(i * 55).springify().damping(18)}>
+              <Animated.View key={r.id} entering={FadeInDown.delay(i * 55).duration(260)}>
                 <RestaurantRow r={r} />
               </Animated.View>
             ))}

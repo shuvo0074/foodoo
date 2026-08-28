@@ -1,6 +1,5 @@
 import React from 'react';
-import { StatusBar } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { StatusBar, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 
@@ -21,9 +20,17 @@ const navTheme = {
   },
 };
 
+/**
+ * No GestureHandlerRootView here on purpose. Nothing in the app uses
+ * react-native-gesture-handler — native-stack and bottom-tabs are both native,
+ * and presses/sheets use RN's own Pressable and Modal. Importing the package
+ * just to wrap the tree pulled in its GestureComponents module, which reads the
+ * deprecated `DrawerLayoutAndroid` off react-native at load time and logged a
+ * deprecation warning on every start. Add it back if a real gesture is needed.
+ */
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaProvider>
         <StoreProvider>
           <NavigationContainer theme={navTheme}>
@@ -32,6 +39,6 @@ export default function App() {
           </NavigationContainer>
         </StoreProvider>
       </SafeAreaProvider>
-    </GestureHandlerRootView>
+    </View>
   );
 }

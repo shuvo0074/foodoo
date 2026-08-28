@@ -6,11 +6,11 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   Extrapolation,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, radius, sp, type, hexA, spring } from '../theme';
+import { colors, radius, sp, type, hexA } from '../theme';
 import { PROMOS } from '../data';
 import Img from './Img';
 import Press from './Press';
@@ -112,7 +112,7 @@ export default function PromoCarousel({ onPressPromo }) {
 
 function Dot({ active, tint }) {
   const a = useAnimatedStyle(() => ({
-    width: withSpring(active ? 20 : 6, spring),
+    width: withTiming(active ? 20 : 6, { duration: 200 }),
     backgroundColor: active ? tint : colors.surfaceMax,
   }));
   return <Animated.View style={[styles.dot, a]} />;

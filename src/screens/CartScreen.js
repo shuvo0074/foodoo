@@ -7,7 +7,6 @@ import Animated, {
   LinearTransition,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
@@ -15,7 +14,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, sp, type, hexA, spring } from '../theme';
+import { colors, radius, sp, type, hexA } from '../theme';
 import { getRestaurant } from '../data';
 import { useStore, money, unitPriceOf, optionLabels } from '../state/store';
 import Press from '../components/Press';
@@ -56,7 +55,7 @@ export default function CartScreen() {
       withTiming(-8, { duration: 55 }),
       withTiming(8, { duration: 55 }),
       withTiming(-5, { duration: 55 }),
-      withSpring(0, spring),
+      withTiming(0, { duration: 70 }),
     );
     Alert.alert('Invalid code', 'Try FOODOO50, FREESHIP or SAVE20.');
   };
@@ -123,9 +122,9 @@ export default function CartScreen() {
             return (
               <Animated.View
                 key={l.key}
-                entering={FadeInDown.delay(Math.min(i, 8) * 45).springify().damping(18)}
+                entering={FadeInDown.delay(Math.min(i, 8) * 45).duration(260)}
                 exiting={FadeOutLeft.duration(220)}
-                layout={LinearTransition.springify().damping(20)}
+                layout={LinearTransition.duration(220)}
               >
                 <View style={styles.line}>
                   <Img uri={l.dish.img} seed={l.dish.id} radius={radius.md} style={{ width: 74, height: 74 }} />

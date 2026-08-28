@@ -106,7 +106,7 @@ export default function OrdersScreen() {
                 const stage = ORDER_STAGES[o.stage];
                 const pct = (o.stage + 1) / ORDER_STAGES.length;
                 return (
-                  <Animated.View key={o.id} entering={FadeInDown.delay(i * 60).springify().damping(18)}>
+                  <Animated.View key={o.id} entering={FadeInDown.delay(i * 60).duration(260)}>
                     <Press onPress={() => nav.navigate('Order', { id: o.id })} style={styles.liveCard} scaleTo={0.98}>
                       <Row>
                         <Img uri={r?.logoImg} seed={o.id} radius={radius.md} style={styles.logo} />
@@ -122,7 +122,7 @@ export default function OrdersScreen() {
                       <View style={styles.track}>
                         <View style={styles.trackBg} />
                         <Animated.View
-                          layout={LinearTransition.springify()}
+                          layout={LinearTransition.duration(220)}
                           style={[styles.trackFill, { width: `${pct * 100}%` }]}
                         />
                       </View>
@@ -150,7 +150,7 @@ export default function OrdersScreen() {
                 const r = getRestaurant(o.rid);
                 const cancelled = o.status === 'cancelled';
                 return (
-                  <Animated.View key={o.id} entering={FadeInDown.delay(Math.min(i, 8) * 55).springify().damping(18)}>
+                  <Animated.View key={o.id} entering={FadeInDown.delay(Math.min(i, 8) * 55).duration(260)}>
                     <View style={styles.pastCard}>
                       <Row>
                         <Img uri={r?.logoImg} seed={o.id} radius={radius.md} style={styles.logo} dim={cancelled ? 0.5 : 0} />

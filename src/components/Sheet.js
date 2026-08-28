@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, View, StyleSheet, Pressable } from 'react-native';
-import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown, Easing } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, sp } from '../theme';
 import { T, IconBtn } from './ui';
@@ -17,8 +17,10 @@ export default function Sheet({ visible, onClose, title, sub, children }) {
         </Animated.View>
 
         <Animated.View
-          entering={SlideInDown.springify().damping(20).stiffness(180)}
-          exiting={SlideOutDown.duration(200)}
+          // Eased, not sprung: a spring overshoots its resting position and
+          // settles back, which on a panel this size reads as a bounce.
+          entering={SlideInDown.duration(280).easing(Easing.out(Easing.cubic))}
+          exiting={SlideOutDown.duration(200).easing(Easing.in(Easing.cubic))}
           style={[styles.panel, { paddingBottom: Math.max(insets.bottom, sp(5)) }]}
         >
           <View style={styles.grabber} />

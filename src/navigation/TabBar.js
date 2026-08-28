@@ -1,20 +1,20 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  interpolate,
+  withTiming,
   interpolateColor,
+  Easing,
 } from 'react-native-reanimated';
-import { BlurView } from '@react-native-community/blur';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, sp, type, hexA, elev, spring } from '../theme';
+import { colors, radius, sp, type, hexA, elev } from '../theme';
 import { useStore } from '../state/store';
 import Press from '../components/Press';
 import CartBar from '../components/CartBar';
+import Frost from '../components/Frost';
 
 // resolved up front — worklets can't call plain JS helpers like hexA()
 const TAB_ACTIVE_BG = hexA(colors.primary, 0.17);
@@ -28,9 +28,16 @@ const TABS = {
 
 function TabItem({ meta, focused, onPress, badge }) {
   const p = useSharedValue(focused ? 1 : 0);
+  // natural width of the label (plus its gap), measured once
+  const labelW = useSharedValue(0);
 
   useEffect(() => {
-    p.value = withSpring(focused ? 1 : 0, spring);
+    // Timing, not spring: a spring overshoots its target and settles back,
+    // which reads as the label wobbling left-right on every tab change.
+    p.value = withTiming(focused ? 1 : 0, {
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+    });
   }, [focused, p]);
 
   const box = useAnimatedStyle(() => ({
@@ -41,31 +48,46 @@ function TabItem({ meta, focused, onPress, badge }) {
     ),
   }));
 
-  const icon = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 + p.value * 0.08 }, { translateY: -p.value }],
+  /**
+   * The label is always laid out at full width; the row slides instead of the
+   * label growing. Animating `width`/`marginLeft` re-runs layout on every frame
+   * (janky) — translateX and opacity stay on the UI thread and never touch it.
+   */
+  const row = useAnimatedStyle(() => ({
+    transform: [{ translateX: ((1 - p.value) * labelW.value) / 2 }],
   }));
 
-  const label = useAnimatedStyle(() => ({
-    width: interpolate(p.value, [0, 1], [0, 52]),
-    opacity: p.value,
-    marginLeft: interpolate(p.value, [0, 1], [0, 6]),
+  const icon = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + p.value * 0.08 }],
   }));
+
+  const label = useAnimatedStyle(() => ({ opacity: p.value }));
 
   return (
     <Press onPress={onPress} haptic="select" scaleTo={0.9} style={styles.tabPress}>
       <Animated.View style={[styles.tab, box]}>
-        <Animated.View style={icon}>
-          <Ionicons
-            name={focused ? meta.icon : meta.iconOff}
-            size={22}
-            color={focused ? colors.primary : colors.mute}
-          />
-          {badge > 0 && <View style={styles.tabBadge} />}
-        </Animated.View>
-        <Animated.View style={[styles.labelClip, label]}>
-          <Animated.Text numberOfLines={1} style={[type.sm, styles.labelText]}>
-            {meta.label}
-          </Animated.Text>
+        <Animated.View style={[styles.tabRow, row]}>
+          <Animated.View style={icon}>
+            <Ionicons
+              name={focused ? meta.icon : meta.iconOff}
+              size={22}
+              color={focused ? colors.primary : colors.mute}
+            />
+            {badge > 0 && <View style={styles.tabBadge} />}
+          </Animated.View>
+
+          <Animated.View
+            style={[styles.labelWrap, label]}
+            pointerEvents="none"
+            onLayout={(e) => {
+              // + the marginLeft, which layout reports outside the measured width
+              labelW.value = e.nativeEvent.layout.width + 6;
+            }}
+          >
+            <Text numberOfLines={1} style={[type.sm, styles.labelText]}>
+              {meta.label}
+            </Text>
+          </Animated.View>
         </Animated.View>
       </Animated.View>
     </Press>
@@ -84,13 +106,7 @@ export default function TabBar({ state, navigation }) {
       <CartBar bottom={pad + 76} />
       <View style={[styles.barWrap, { paddingBottom: pad }]} pointerEvents="box-none">
         <View style={[styles.bar, elev(3)]}>
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="dark"
-            blurAmount={Platform.OS === 'android' ? 12 : 18}
-            reducedTransparencyFallbackColor={colors.surface}
-          />
-          <View style={styles.barTint} />
+          <Frost blur={18} iosTint="rgba(16,16,24,0.72)" androidTint="rgba(18,18,26,0.96)" />
           {state.routes.map((route, i) => {
             const meta = TABS[route.name];
             if (!meta) return null;
@@ -137,17 +153,18 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.strokeHi,
   },
-  barTint: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(16,16,24,0.72)' },
   tabPress: { flex: 1 },
   tab: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     height: 46,
     borderRadius: radius.pill,
     marginHorizontal: 2,
+    // clip the label as it slides out from behind the icon
+    overflow: 'hidden',
   },
-  labelClip: { overflow: 'hidden' },
+  tabRow: { flexDirection: 'row', alignItems: 'center' },
+  labelWrap: { marginLeft: 6 },
   labelText: { color: colors.primary, fontWeight: '800' },
   tabBadge: {
     position: 'absolute',

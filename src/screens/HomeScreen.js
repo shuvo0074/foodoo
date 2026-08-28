@@ -8,7 +8,6 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
@@ -19,6 +18,7 @@ import { ADDRESSES, TRENDING, USER, byCategory, getRestaurant } from '../data';
 import { useStore } from '../state/store';
 import Press from '../components/Press';
 import Sheet from '../components/Sheet';
+import Frost from '../components/Frost';
 import CategoryRail from '../components/CategoryRail';
 import PromoCarousel from '../components/PromoCarousel';
 import { RestaurantCard } from '../components/RestaurantCard';
@@ -83,13 +83,7 @@ export default function HomeScreen() {
       {/* ------------------------------ header ----------------------------- */}
       <View style={[styles.header, { paddingTop: insets.top, height: headerH }]} pointerEvents="box-none">
         <Animated.View style={[StyleSheet.absoluteFill, headerBg]} pointerEvents="none">
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="dark"
-            blurAmount={18}
-            reducedTransparencyFallbackColor={colors.bg}
-          />
-          <View style={styles.headerTint} />
+          <Frost blur={18} iosTint="rgba(11,11,16,0.66)" androidTint="rgba(11,11,16,0.96)" />
         </Animated.View>
 
         <Row style={styles.headerRow}>
@@ -157,7 +151,7 @@ export default function HomeScreen() {
 
         {/* live order strip */}
         {!!liveOrder && (
-          <Animated.View entering={FadeInDown.springify().damping(18)}>
+          <Animated.View entering={FadeInDown.duration(260)}>
             <Press
               onPress={() => nav.navigate('Order', { id: liveOrder.id })}
               style={styles.liveStrip}
@@ -208,7 +202,7 @@ export default function HomeScreen() {
             contentContainerStyle={{ paddingHorizontal: sp(5), gap: sp(3.5) }}
           >
             {TRENDING.map((d, i) => (
-              <Animated.View key={d.id} entering={FadeInDown.delay(i * 55).springify().damping(18)}>
+              <Animated.View key={d.id} entering={FadeInDown.delay(i * 55).duration(260)}>
                 <DishCard dish={d} />
               </Animated.View>
             ))}
@@ -238,7 +232,7 @@ export default function HomeScreen() {
             list.map((r, i) => (
               <Animated.View
                 key={`${cat}-${r.id}`}
-                entering={FadeInDown.delay(Math.min(i, 6) * 60).springify().damping(18)}
+                entering={FadeInDown.delay(Math.min(i, 6) * 60).duration(260)}
               >
                 <RestaurantCard r={r} width={CARD_W} />
               </Animated.View>
@@ -295,7 +289,6 @@ const styles = StyleSheet.create({
     zIndex: 10,
     justifyContent: 'flex-end',
   },
-  headerTint: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(11,11,16,0.66)' },
   headerRow: { paddingHorizontal: sp(5), paddingBottom: sp(2.5) },
   pin: {
     width: 34,

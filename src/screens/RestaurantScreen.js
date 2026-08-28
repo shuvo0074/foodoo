@@ -10,7 +10,6 @@ import Animated, {
   Extrapolation,
   runOnJS,
 } from 'react-native-reanimated';
-import { BlurView } from '@react-native-community/blur';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -22,6 +21,7 @@ import { useStore, money } from '../state/store';
 import Press from '../components/Press';
 import Img from '../components/Img';
 import CartBar from '../components/CartBar';
+import Frost from '../components/Frost';
 import { DishRow } from '../components/DishCard';
 import { HeartButton } from '../components/RestaurantCard';
 import { T, Row, Badge, Empty } from '../components/ui';
@@ -199,7 +199,7 @@ export default function RestaurantScreen() {
           </Row>
 
           {!!r.promo && (
-            <Animated.View entering={FadeInDown.delay(150).springify().damping(18)}>
+            <Animated.View entering={FadeInDown.delay(150).duration(260)}>
               <View style={styles.promo}>
                 <Ionicons name="pricetag" size={15} color={colors.gold} />
                 <T v="sm" c={colors.gold} style={{ marginLeft: sp(2.5), flex: 1, fontWeight: '700' }}>
@@ -255,13 +255,7 @@ export default function RestaurantScreen() {
       {/* ---------------------------- top chrome --------------------------- */}
       <View style={[styles.topBar, { height: topBarH, paddingTop: insets.top }]} pointerEvents="box-none">
         <Animated.View style={[StyleSheet.absoluteFill, barBg]} pointerEvents="none">
-          <BlurView
-            style={StyleSheet.absoluteFill}
-            blurType="dark"
-            blurAmount={20}
-            reducedTransparencyFallbackColor={colors.bg}
-          />
-          <View style={styles.barTint} />
+          <Frost blur={20} iosTint="rgba(11,11,16,0.7)" androidTint="rgba(11,11,16,0.96)" />
         </Animated.View>
 
         <Row style={{ paddingHorizontal: sp(4), flex: 1 }}>
@@ -285,13 +279,7 @@ export default function RestaurantScreen() {
         style={[styles.chips, { top: topBarH }, chipsStyle]}
         pointerEvents={chipsOn ? 'auto' : 'none'}
       >
-        <BlurView
-          style={StyleSheet.absoluteFill}
-          blurType="dark"
-          blurAmount={20}
-          reducedTransparencyFallbackColor={colors.bg}
-        />
-        <View style={styles.barTint} />
+        <Frost blur={20} iosTint="rgba(11,11,16,0.7)" androidTint="rgba(11,11,16,0.96)" />
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -365,7 +353,6 @@ const styles = StyleSheet.create({
   },
   hair: { height: StyleSheet.hairlineWidth, backgroundColor: colors.stroke, marginHorizontal: sp(5) },
   topBar: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20, justifyContent: 'center' },
-  barTint: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(11,11,16,0.7)' },
   round: {
     width: 38,
     height: 38,

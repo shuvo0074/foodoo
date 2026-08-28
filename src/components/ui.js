@@ -74,9 +74,13 @@ export const PrimaryButton = ({ label, onPress, icon, right, disabled, style, ha
       end={{ x: 1, y: 1 }}
       style={[styles.primaryBtn, !disabled && elev(2, colors.primary)]}
     >
-      {!!icon && <Ionicons name={icon} size={18} color="#fff" style={{ marginRight: 8 }} />}
-      <Text style={[type.h3, { color: '#fff' }]}>{label}</Text>
-      {!!right && <View style={styles.btnRight}>{right}</View>}
+      {/* Padding goes on this inner row, not the gradient — on iOS the gradient
+          paints inside its own padding box, which pushed `right` to the edge. */}
+      <View style={styles.primaryBtnInner}>
+        {!!icon && <Ionicons name={icon} size={18} color="#fff" style={{ marginRight: 8 }} />}
+        <Text style={[type.h3, { color: '#fff' }]} numberOfLines={1}>{label}</Text>
+        {!!right && <View style={{ marginLeft: sp(3) }}>{right}</View>}
+      </View>
     </LinearGradient>
   </Press>
 );
@@ -200,12 +204,14 @@ const styles = StyleSheet.create({
   primaryBtn: {
     height: 56,
     borderRadius: radius.lg,
+  },
+  primaryBtnInner: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: sp(5),
   },
-  btnRight: { position: 'absolute', right: sp(5) },
   ghostBtn: {
     height: 48,
     paddingHorizontal: sp(5),

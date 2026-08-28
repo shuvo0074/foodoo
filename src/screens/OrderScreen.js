@@ -8,7 +8,6 @@ import Animated, {
   useSharedValue,
   withRepeat,
   withSequence,
-  withSpring,
   withTiming,
   interpolate,
   Easing,
@@ -19,7 +18,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, radius, sp, type, hexA, grad, spring, springSoft } from '../theme';
+import { colors, radius, sp, type, hexA, grad } from '../theme';
 import { ORDER_STAGES, getRestaurant, ADDRESSES } from '../data';
 import { useStore, money } from '../state/store';
 import Press from '../components/Press';
@@ -68,7 +67,7 @@ export default function OrderScreen() {
   }, [order, done, advance]);
 
   useEffect(() => {
-    progress.value = withSpring(stage / last, springSoft);
+    progress.value = withTiming(stage / last, { duration: 600, easing: Easing.inOut(Easing.cubic) });
   }, [stage, last, progress]);
 
   useEffect(() => {
@@ -228,7 +227,7 @@ export default function OrderScreen() {
         </View>
 
         {/* ---------------------------- courier ---------------------------- */}
-        <Animated.View entering={FadeInDown.delay(120).springify().damping(18)}>
+        <Animated.View entering={FadeInDown.delay(120).duration(260)}>
           <Row style={styles.courierCard}>
             <LinearGradient colors={grad.violet} style={styles.avatar}>
               <T v="h3" c="#fff">{order.courier.name[0]}</T>
@@ -285,7 +284,7 @@ export default function OrderScreen() {
 
         {/* ----------------------------- rating ---------------------------- */}
         {done && (
-          <Animated.View entering={FadeInDown.springify().damping(18)} style={styles.rate}>
+          <Animated.View entering={FadeInDown.duration(260)} style={styles.rate}>
             <T v="h2">How was it?</T>
             <T v="sm" c={colors.mute} style={{ marginTop: sp(1.5) }}>Rate {r?.name}</T>
             <Row style={{ marginTop: sp(4), gap: sp(2) }}>
@@ -346,7 +345,7 @@ export default function OrderScreen() {
 function StageDot({ passed, active, icon }) {
   const s = useSharedValue(passed ? 1 : 0);
   useEffect(() => {
-    s.value = withSpring(passed ? 1 : 0, spring);
+    s.value = withTiming(passed ? 1 : 0, { duration: 220 });
   }, [passed, s]);
 
   const a = useAnimatedStyle(() => ({

@@ -7,13 +7,12 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { colors, radius, sp, type, hexA, elev, spring, grad } from '../theme';
+import { colors, radius, sp, type, hexA, elev, grad } from '../theme';
 import { useStore, money, unitPriceOf } from '../state/store';
 import { getRestaurant } from '../data';
 import Press, { tap } from './Press';
@@ -47,7 +46,7 @@ export function QuickAdd({ dish, size = 34, onNeedsDetail }) {
   const pop = useSharedValue(1);
   const aStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
   const bump = () => {
-    pop.value = withSequence(withTiming(0.82, { duration: 80 }), withSpring(1, { damping: 7, stiffness: 320 }));
+    pop.value = withSequence(withTiming(0.82, { duration: 80 }), withTiming(1, { duration: 150 }));
   };
 
   const doAdd = useCallback(() => {
@@ -91,7 +90,7 @@ export function QuickAdd({ dish, size = 34, onNeedsDetail }) {
   return (
     <Animated.View
       entering={FadeIn.duration(160)}
-      layout={LinearTransition.springify().damping(18)}
+      layout={LinearTransition.duration(220)}
       style={[styles.stepper, { height: size }, aStyle]}
     >
       <Press onPress={() => { setQty(line.key, qty - 1); bump(); }} haptic="light" style={styles.stepBtn} scaleTo={0.85}>

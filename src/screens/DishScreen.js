@@ -8,7 +8,6 @@ import Animated, {
   useSharedValue,
   interpolate,
   Extrapolation,
-  withSpring,
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
@@ -79,7 +78,7 @@ export default function DishScreen() {
   const fav = favDishes.includes(dish.id);
 
   const bump = () => {
-    pop.value = withSequence(withTiming(1.08, { duration: 110 }), withSpring(1, { damping: 8, stiffness: 260 }));
+    pop.value = withSequence(withTiming(1.08, { duration: 110 }), withTiming(1, { duration: 150 }));
   };
 
   const toggle = (group, itemId) => {
@@ -178,7 +177,7 @@ export default function DishScreen() {
             return (
               <Animated.View
                 key={g.id}
-                entering={FadeInDown.delay(gi * 70).springify().damping(18)}
+                entering={FadeInDown.delay(gi * 70).duration(260)}
                 style={{ marginTop: sp(7) }}
               >
                 <Row>
@@ -285,10 +284,13 @@ export default function DishScreen() {
               end={{ x: 1, y: 1 }}
               style={[styles.addBtn, elev(2, colors.primary)]}
             >
-              <T v="h3" c="#fff">Add to cart</T>
-              <Animated.View style={[styles.pricePill, priceStyle]}>
-                <T v="sm" c="#fff" style={{ fontWeight: '800' }}>{money(total)}</T>
-              </Animated.View>
+              {/* padding on the inner row, not the gradient — see PrimaryButton */}
+              <View style={styles.addBtnInner}>
+                <T v="h3" c="#fff">Add to cart</T>
+                <Animated.View style={[styles.pricePill, priceStyle]}>
+                  <T v="sm" c="#fff" style={{ fontWeight: '800' }}>{money(total)}</T>
+                </Animated.View>
+              </View>
             </LinearGradient>
           </Press>
         </View>
@@ -395,6 +397,9 @@ const styles = StyleSheet.create({
   addBtn: {
     height: 56,
     borderRadius: radius.lg,
+  },
+  addBtnInner: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

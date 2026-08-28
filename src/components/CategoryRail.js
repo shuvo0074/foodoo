@@ -3,12 +3,11 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
   withTiming,
   interpolateColor,
 } from 'react-native-reanimated';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { colors, radius, sp, type, hexA, spring } from '../theme';
+import { colors, radius, sp, type, hexA } from '../theme';
 import { CATEGORIES } from '../data';
 import Press from './Press';
 
@@ -21,7 +20,7 @@ function Chip({ cat, active, onPress }) {
   const edge = useMemo(() => hexA(cat.tint, 0.55), [cat.tint]);
 
   useEffect(() => {
-    p.value = withSpring(active ? 1 : 0, spring);
+    p.value = withTiming(active ? 1 : 0, { duration: 200 });
   }, [active, p]);
 
   const box = useAnimatedStyle(() => ({

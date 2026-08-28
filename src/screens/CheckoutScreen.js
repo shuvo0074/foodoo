@@ -82,7 +82,7 @@ export default function CheckoutScreen() {
           {ADDRESSES.map((a, i) => {
             const on = a.id === addressId;
             return (
-              <Animated.View key={a.id} entering={FadeInDown.delay(i * 50).springify().damping(18)}>
+              <Animated.View key={a.id} entering={FadeInDown.delay(i * 50).duration(260)}>
                 <Press
                   onPress={() => setAddress(a.id)}
                   style={[styles.pick, on && styles.pickOn]}
@@ -135,7 +135,7 @@ export default function CheckoutScreen() {
           {PAYMENTS.map((p, i) => {
             const on = p.id === paymentId;
             return (
-              <Animated.View key={p.id} entering={FadeInDown.delay(i * 50).springify().damping(18)}>
+              <Animated.View key={p.id} entering={FadeInDown.delay(i * 50).duration(260)}>
                 <Press
                   onPress={() => setPayment(p.id)}
                   style={[styles.pick, on && styles.pickOn]}
