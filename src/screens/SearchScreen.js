@@ -22,6 +22,18 @@ import { T, Row, Empty, SectionHeader } from '../components/ui';
 // resolved up front — worklets can't call plain JS helpers like hexA()
 const FOCUS_BORDER = hexA(colors.primary, 0.65);
 
+/**
+ * Search keeps a spring entrance, just a calmer one: damping 26 against
+ * stiffness 180 sits just under critical (ζ ≈ 0.97), so rows settle with a hint
+ * of give rather than a visible bounce. The stagger is capped so a long result
+ * list doesn't ripple all the way down.
+ *
+ * This has to be a factory — Reanimated's builder methods mutate the instance
+ * and return it, so a shared constant would hand every row the same delay.
+ */
+const rowIn = (i, step = 30) =>
+  FadeInDown.delay(Math.min(i, 8) * step).springify().damping(26).stiffness(180);
+
 const POPULAR = ['Mandi', 'Shawarma', 'Kabsa', 'Kunafa', 'Broast', 'Mashawi'];
 const FILTERS = [
   { id: 'all', label: 'Everything' },
@@ -131,7 +143,7 @@ export default function SearchScreen() {
                 <SectionHeader title="Recent" action="Clear" onAction={() => setRecent([])} />
                 <View style={{ paddingHorizontal: sp(5), gap: sp(2) }}>
                   {recent.map((term, i) => (
-                    <Animated.View key={term} entering={FadeInDown.delay(i * 50).springify().damping(18)}>
+                    <Animated.View key={term} entering={rowIn(i, 32)}>
                       <Press onPress={() => commit(term)} style={styles.recentRow} scaleTo={0.98}>
                         <Ionicons name="time-outline" size={17} color={colors.mute} />
                         <T v="body" style={{ flex: 1, marginLeft: sp(3) }}>{term}</T>
@@ -152,7 +164,7 @@ export default function SearchScreen() {
             <SectionHeader title="Popular searches" />
             <View style={styles.chips}>
               {POPULAR.map((p, i) => (
-                <Animated.View key={p} entering={FadeInDown.delay(i * 45).springify().damping(18)}>
+                <Animated.View key={p} entering={rowIn(i, 30)}>
                   <Press onPress={() => commit(p)} haptic="select" scaleTo={0.94}>
                     <View style={styles.chip}>
                       <Ionicons name="trending-up" size={13} color={colors.primary} />
@@ -169,7 +181,7 @@ export default function SearchScreen() {
               {CATEGORIES.filter((c) => c.id !== 'all').map((c, i) => (
                 <Animated.View
                   key={c.id}
-                  entering={FadeInDown.delay(i * 40).springify().damping(18)}
+                  entering={rowIn(i, 28)}
                   style={{ width: '48%' }}
                 >
                   <Press onPress={() => commit(c.label)} scaleTo={0.97}>
@@ -210,7 +222,7 @@ export default function SearchScreen() {
             <SectionHeader title="Restaurants" sub={`${results.restaurants.length} found`} />
             <View style={{ paddingHorizontal: sp(5), gap: sp(3) }}>
               {results.restaurants.map((r, i) => (
-                <Animated.View key={r.id} entering={FadeInDown.delay(i * 50).springify().damping(18)}>
+                <Animated.View key={r.id} entering={rowIn(i, 32)}>
                   <RestaurantRow r={r} />
                 </Animated.View>
               ))}
@@ -224,7 +236,7 @@ export default function SearchScreen() {
             <SectionHeader title="Dishes" sub={`${results.dishes.length} found`} />
             <View style={styles.dishList}>
               {results.dishes.map((d, i) => (
-                <Animated.View key={d.id} entering={FadeInDown.delay(i * 40).springify().damping(18)}>
+                <Animated.View key={d.id} entering={rowIn(i, 28)}>
                   <DishRow dish={d} />
                   {i < results.dishes.length - 1 && <View style={styles.hair} />}
                 </Animated.View>
