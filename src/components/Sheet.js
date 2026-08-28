@@ -1,27 +1,70 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, View, StyleSheet, Pressable } from 'react-native';
-import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown, Easing } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  runOnJS,
+  Easing,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, sp } from '../theme';
 import { T, IconBtn } from './ui';
 
-/** Bottom sheet: dimmed backdrop, spring-in panel, tap-outside to close. */
+/**
+ * Bottom sheet: dimmed backdrop, slide-up panel, tap-outside to close.
+ *
+ * The animation is driven by a shared value and `useAnimatedStyle` rather than
+ * Reanimated's `entering`/`exiting` layout animations. Layout animations inside
+ * a React Native `Modal` misbehave on iOS — the panel renders in place but its
+ * touch targets don't follow, so taps inside it (picking a row, the close
+ * button) silently do nothing. Plain animated styles behave on both platforms.
+ */
 export default function Sheet({ visible, onClose, title, sub, children }) {
   const insets = useSafeAreaInsets();
 
+  // keep the modal mounted until the close animation has finished
+  const [mounted, setMounted] = useState(visible);
+  const p = useSharedValue(0);
+  const height = useSharedValue(420);
+
+  const unmount = useCallback(() => setMounted(false), []);
+
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      p.value = withTiming(1, { duration: 260, easing: Easing.out(Easing.cubic) });
+    } else {
+      p.value = withTiming(0, { duration: 200, easing: Easing.in(Easing.cubic) }, (done) => {
+        if (done) runOnJS(unmount)();
+      });
+    }
+  }, [visible, p, unmount]);
+
+  const backdropStyle = useAnimatedStyle(() => ({ opacity: p.value }));
+  const panelStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: (1 - p.value) * height.value }],
+  }));
+
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+    <Modal
+      visible={mounted}
+      transparent
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
       <View style={StyleSheet.absoluteFill}>
-        <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(160)} style={StyleSheet.absoluteFill}>
+        <Animated.View style={[StyleSheet.absoluteFill, backdropStyle]}>
           <Pressable style={[StyleSheet.absoluteFill, styles.backdrop]} onPress={onClose} />
         </Animated.View>
 
         <Animated.View
-          // Eased, not sprung: a spring overshoots its resting position and
-          // settles back, which on a panel this size reads as a bounce.
-          entering={SlideInDown.duration(280).easing(Easing.out(Easing.cubic))}
-          exiting={SlideOutDown.duration(200).easing(Easing.in(Easing.cubic))}
-          style={[styles.panel, { paddingBottom: Math.max(insets.bottom, sp(5)) }]}
+          onLayout={(e) => {
+            // slide exactly its own height so it always clears the screen
+            height.value = e.nativeEvent.layout.height || 420;
+          }}
+          style={[styles.panel, { paddingBottom: Math.max(insets.bottom, sp(5)) }, panelStyle]}
         >
           <View style={styles.grabber} />
           <View style={styles.head}>

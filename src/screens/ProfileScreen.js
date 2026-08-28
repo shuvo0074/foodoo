@@ -16,6 +16,7 @@ import { colors, radius, sp, hexA, grad } from '../theme';
 import { USER, ADDRESSES, PAYMENTS, getRestaurant } from '../data';
 import { useStore } from '../state/store';
 import Press from '../components/Press';
+import AddressSheet from '../components/AddressSheet';
 import { RestaurantRow } from '../components/RestaurantCard';
 import { T, Row, SectionHeader, Badge, Empty } from '../components/ui';
 
@@ -30,6 +31,7 @@ export default function ProfileScreen() {
   const nav = useNavigation();
   const { favRestaurants, orders, addressId, paymentId } = useStore();
 
+  const [addrOpen, setAddrOpen] = useState(false);
   const [notifs, setNotifs] = useState(true);
   const [promos, setPromos] = useState(true);
   const [contactless, setContactless] = useState(false);
@@ -125,7 +127,7 @@ export default function ProfileScreen() {
             icon="location-outline"
             title="Delivery address"
             value={address ? `${address.label} · ${address.line}` : 'Add one'}
-            onPress={() => nav.navigate('Home')}
+            onPress={() => setAddrOpen(true)}
           />
           <Hair />
           <LinkRow
@@ -200,6 +202,8 @@ export default function ProfileScreen() {
           FOODOO · DEMO BUILD · NO BACKEND YET
         </T>
       </ScrollView>
+
+      <AddressSheet visible={addrOpen} onClose={() => setAddrOpen(false)} />
     </View>
   );
 }

@@ -17,7 +17,7 @@ import { colors, radius, sp, hexA } from '../theme';
 import { ADDRESSES, TRENDING, USER, byCategory, getRestaurant } from '../data';
 import { useStore } from '../state/store';
 import Press from '../components/Press';
-import Sheet from '../components/Sheet';
+import AddressSheet from '../components/AddressSheet';
 import Frost from '../components/Frost';
 import CategoryRail from '../components/CategoryRail';
 import PromoCarousel from '../components/PromoCarousel';
@@ -31,7 +31,7 @@ const CARD_W = SCREEN - sp(10);
 export default function HomeScreen() {
   const nav = useNavigation();
   const insets = useSafeAreaInsets();
-  const { addressId, setAddress, totals, orders } = useStore();
+  const { addressId, totals, orders } = useStore();
 
   const [cat, setCat] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -240,40 +240,7 @@ export default function HomeScreen() {
         </View>
       </Animated.ScrollView>
 
-      {/* --------------------------- address sheet ------------------------- */}
-      <Sheet
-        visible={addrOpen}
-        onClose={() => setAddrOpen(false)}
-        title="Delivery address"
-        sub="Where should we send it?"
-      >
-        <View style={{ gap: sp(2.5) }}>
-          {ADDRESSES.map((a) => {
-            const active = a.id === addressId;
-            return (
-              <Press
-                key={a.id}
-                onPress={() => {
-                  setAddress(a.id);
-                  setAddrOpen(false);
-                }}
-                style={[styles.addrRow, active && styles.addrRowActive]}
-                scaleTo={0.98}
-              >
-                <View style={[styles.addrIcon, active && { backgroundColor: hexA(colors.primary, 0.18) }]}>
-                  <Ionicons name={a.icon} size={17} color={active ? colors.primary : colors.dim} />
-                </View>
-                <View style={{ flex: 1, marginLeft: sp(3) }}>
-                  <T v="h3">{a.label}</T>
-                  <T v="sm" c={colors.mute} numberOfLines={1} style={{ marginTop: 2 }}>{a.line}</T>
-                  <T v="xs" c={colors.mute} style={{ marginTop: 4 }}>{a.note.toUpperCase()}</T>
-                </View>
-                {active && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
-              </Press>
-            );
-          })}
-        </View>
-      </Sheet>
+      <AddressSheet visible={addrOpen} onClose={() => setAddrOpen(false)} />
     </View>
   );
 }
@@ -336,23 +303,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: hexA(colors.mint, 0.16),
-  },
-  addrRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: sp(3.5),
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.stroke,
-  },
-  addrRowActive: { borderColor: hexA(colors.primary, 0.5), backgroundColor: hexA(colors.primary, 0.07) },
-  addrIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surfaceHi,
   },
 });
